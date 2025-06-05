@@ -93,10 +93,18 @@ public class Main {
 
         if (choice == 1) {
             System.out.println("Beginning search.\n");
+            long startTime = System.nanoTime();
             forwardSelection(data, numFeatures);
+            long endTime = System.nanoTime();
+            double elapsedSec = (endTime - startTime) / 1e9;
+            System.out.printf("%nTime taken: %.4f seconds%n", elapsedSec);
         } else if (choice == 2) {
             System.out.println("Beginning search.\n");
+            long startTime = System.nanoTime();
             backwardElimination(data, numFeatures);
+            long endTime = System.nanoTime();
+            double elapsedSec = (endTime - startTime) / 1e9;
+            System.out.printf("%nTime taken: %.4f seconds%n", elapsedSec);
         } else {
             System.out.println("Bad choice, exiting.");
         }
@@ -177,8 +185,8 @@ public class Main {
                 }
             }
 
+            // If no feature improves, break (should not happen since thisRoundBest starts at -1)
             if (bestFeature == -1) {
-                // Should never happen since thisRoundBest started at -1
                 break;
             }
             if (thisRoundBest < bestAccuracy) {
@@ -223,7 +231,7 @@ public class Main {
         System.out.printf("%nFeature set %s was best, accuracy is %.1f%%%n%n",
                           formatFeatureSet(features), bestAccuracy);
 
-        // Subsequent rounds: keep removing the worst feature even if accuracy drops
+        // Subsequent rounds: keep removing the worst feature
         while (features.size() > 1) {
             int worstFeature = -1;
             double thisRoundBest = -1;
@@ -243,8 +251,8 @@ public class Main {
                 }
             }
 
+            // If no removal improves, break (should not happen since thisRoundBest starts at -1)
             if (worstFeature == -1) {
-                // Should never happen since thisRoundBest started at -1
                 break;
             }
             if (thisRoundBest < bestAccuracy) {
@@ -261,10 +269,31 @@ public class Main {
                            String.format("%.1f%%.", bestOverallAcc));
     }
 
-    // Stub leaveOneOut: returns a random accuracy between 0 and 100
+    // leave-one-out nearest-neighbor accuracy over selected features
     static double leaveOneOut(List<double[]> data, List<Integer> features) {
-        Random rand = new Random();
-        return rand.nextDouble() * 100.0;
+        if (features.isEmpty()) return defaultAccuracy(data);
+        int correct = 0;
+        for (int i = 0; i < data.size(); i++) {
+            double[] test = data.get(i);
+            double minDist = Double.MAX_VALUE;
+            int predicted = -1;
+            for (int j = 0; j < data.size(); j++) {
+                if (j == i) continue;
+                double[] other = data.get(j);
+                double dist = 0;
+                for (int f : features) {
+                    double diff = test[f + 1] - other[f + 1];
+                    dist += diff * diff;
+                }
+                dist = Math.sqrt(dist);
+                if (dist < minDist) {
+                    minDist = dist;
+                    predicted = (int) other[0];
+                }
+            }
+            if (predicted == (int) test[0]) correct++;
+        }
+        return 100.0 * correct / data.size();
     }
 
     // Default accuracy: guess the most common class label
