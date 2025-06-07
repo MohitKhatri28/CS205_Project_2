@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         // Prompt user for dataset filename
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to Bertie Woosters Feature Selection Algorithm.");
+        System.out.println("Welcome to Feature Selection Algorithm.");
         System.out.print("Type in the name of the file to test: ");
         String filename = scanner.nextLine().trim();
 
@@ -77,7 +77,7 @@ public class Main {
         // Compute and show baseline accuracy using all features
         List<Integer> allFeatures = new ArrayList<>();
         for (int i = 0; i < numFeatures; i++) allFeatures.add(i);
-        double baseline = calculateAccuracy(data, allFeatures);
+        double baseline = calcLeaveOneOutAccuracy(data, allFeatures);
         System.out.printf(
             "Running nearest neighbor with all %d features, using \"leaving-one-out\" evaluation, " +
             "I get an accuracy of %.1f%%%n%n", numFeatures, baseline);
@@ -147,7 +147,7 @@ public class Main {
         for (int f = 0; f < numFeatures; f++) {
             List<Integer> temp = new ArrayList<>();
             temp.add(f);
-            double acc = calculateAccuracy(data, temp);
+            double acc = calcLeaveOneOutAccuracy(data, temp);
             System.out.printf("Using feature(s) %s accuracy is %.1f%%%n", formatFeatureSet(temp), acc);
             if (acc > bestAccuracy) {
                 bestAccuracy = acc;
@@ -172,7 +172,7 @@ public class Main {
                 if (features.contains(f)) continue;
                 List<Integer> temp = new ArrayList<>(features);
                 temp.add(f);
-                double acc = calculateAccuracy(data, temp);
+                double acc = calcLeaveOneOutAccuracy(data, temp);
                 System.out.printf("Using feature(s) %s accuracy is %.1f%%%n", formatFeatureSet(temp), acc);
                 if (acc > thisRoundBest) {
                     thisRoundBest = acc;
@@ -208,7 +208,7 @@ public class Main {
         List<Integer> features = new ArrayList<>();
         for (int i = 0; i < numFeatures; i++) features.add(i);
         List<Integer> bestOverallSet = new ArrayList<>(features);
-        double bestOverallAcc = calculateAccuracy(data, features);
+        double bestOverallAcc = calcLeaveOneOutAccuracy(data, features);
 
         double bestAccuracy = bestOverallAcc;
 
@@ -216,7 +216,7 @@ public class Main {
         for (int f : new ArrayList<>(features)) {
             List<Integer> temp = new ArrayList<>(features);
             temp.remove(Integer.valueOf(f));
-            double acc = calculateAccuracy(data, temp);
+            double acc = calcLeaveOneOutAccuracy(data, temp);
             System.out.printf("Using feature(s) %s accuracy is %.1f%%%n", formatFeatureSet(temp), acc);
             if (acc > bestAccuracy) {
                 bestAccuracy = acc;
@@ -238,7 +238,7 @@ public class Main {
             for (int f : new ArrayList<>(features)) {
                 List<Integer> temp = new ArrayList<>(features);
                 temp.remove(Integer.valueOf(f));
-                double acc = calculateAccuracy(data, temp);
+                double acc = calcLeaveOneOutAccuracy(data, temp);
                 System.out.printf("Using feature(s) %s accuracy is %.1f%%%n", formatFeatureSet(temp), acc);
                 if (acc > thisRoundBest) {
                     thisRoundBest = acc;
@@ -270,7 +270,7 @@ public class Main {
     }
 
     // Check accuracy with leave-one-out evaluation over selected features
-    static double calculateAccuracy(List<double[]> data, List<Integer> features) {
+    static double calcLeaveOneOutAccuracy(List<double[]> data, List<Integer> features) {
         if (features.isEmpty()) return defaultAccuracy(data);
 
         int correct = 0;
