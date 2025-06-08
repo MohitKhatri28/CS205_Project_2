@@ -142,6 +142,8 @@ public class Main {
         double bestOverallAcc = -1;
 
         double bestAccuracy = defaultAccuracy(data);  // accuracy with no features
+        // Print default (0-feature) accuracy
+        System.out.printf("Using feature(s) %s accuracy is %.1f%%%n", formatFeatureSet(new ArrayList<>()), bestAccuracy);
 
         // First round: evaluate each single feature individually
         for (int f = 0; f < numFeatures; f++) {
@@ -211,6 +213,9 @@ public class Main {
         double bestOverallAcc = calcLeaveOneOutAccuracy(data, features);
 
         double bestAccuracy = bestOverallAcc;
+
+        // Print accuracy with all features as the starting point
+        System.out.printf("Using feature(s) %s accuracy is %.1f%%%n", formatFeatureSet(features), bestOverallAcc);
 
         // First round: try removing each feature individually
         for (int f : new ArrayList<>(features)) {
